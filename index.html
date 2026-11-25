@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d090b" />
+  <title>Para Andy — De Jairo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Ambient Background Canvas -->
+  <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+
+  <!-- Top Floating Controls (Mobile-first thumb-easy) -->
+  <div class="top-floating-bar">
+    <button id="music-toggle" class="pill-btn" aria-label="Activar melodía suave">
+      <span class="music-icon" id="music-icon">♪</span>
+      <span id="music-text">Música: Off</span>
+    </button>
+    <button id="open-editor-btn" class="pill-btn editor-trigger-btn hidden-for-andy" title="Pestaña para que Jairo revise y edite todos los textos">
+      <span>✏️ Editar Textos</span>
+    </button>
+  </div>
+
+  <!-- Welcome Overlay (Portada de celular) -->
+  <div id="welcome-overlay" class="welcome-overlay">
+    <div class="welcome-card">
+      <div class="welcome-badge" data-editable="welcome_badge">Para ti, Andy</div>
+      <div class="welcome-photo-ring">
+        <img src="assets/media/06001DDF-016B-4158-ABAE-4F8AA1CAE8AD.jpg" alt="Andy y Jairo" />
+      </div>
+      <h1 class="welcome-title" data-editable="welcome_title">Hola, mi amor...</h1>
+      <p class="welcome-subtitle" data-editable="welcome_subtitle">
+        Sé que estos días han sido muy duros y que estás cansada. No vengo a darte excusas ni promesas vacías; solo quiero hablarte desde el corazón y recordarte lo que somos.
+      </p>
+      <button id="open-letter-btn" class="primary-glow-btn full-width-btn">
+        <span data-editable="welcome_btn">Entrar y leer a Jairo</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <p class="welcome-hint">Desliza hacia abajo a tu ritmo · Con sonido suave</p>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" aria-label="Navegación principal">
+    <a href="#inicio" class="bottom-nav-item active">
+      <span class="nav-ico">♥</span>
+      <span>Inicio</span>
+    </a>
+    <a href="#el-collar" class="bottom-nav-item">
+      <span class="nav-ico">✦</span>
+      <span>6 Jun</span>
+    </a>
+    <a href="#de-frente" class="bottom-nav-item">
+      <span class="nav-ico">✉</span>
+      <span>La Verdad</span>
+    </a>
+    <a href="#damon" class="bottom-nav-item">
+      <span class="nav-ico">🐾</span>
+      <span>Damon</span>
+    </a>
+    <a href="#recuerdos" class="bottom-nav-item">
+      <span class="nav-ico">📸</span>
+      <span>Nosotros</span>
+    </a>
+    <a href="#esperanza" class="bottom-nav-item">
+      <span class="nav-ico">🤍</span>
+      <span>Final</span>
+    </a>
+  </nav>
+
+  <main class="mobile-story-container">
+    <!-- SECCIÓN 1: HERO / INICIO -->
+    <section id="inicio" class="story-section hero-mobile">
+      <div class="hero-card-visual">
+        <img src="assets/media/06001DDF-016B-4158-ABAE-4F8AA1CAE8AD.jpg" alt="Andy y Jairo" class="hero-main-img" />
+        <div class="hero-gradient-mask"></div>
+        <div class="hero-overlay-text">
+          <span class="kicker-pill" data-editable="hero_kicker">Andy &amp; Jairo · Desde aquel 6 de marzo</span>
+          <h1 class="hero-title" data-editable="hero_title">
+            No quiero que este mal momento nos haga olvidar lo felices que éramos
+          </h1>
+        </div>
+      </div>
+
+      <div class="hero-intro-box">
+        <p class="lead-paragraph" data-editable="hero_lead">
+          Yo sé que hoy todo cuesta. Sé que rompí tu confianza y sé lo mucho que te pesa dónde estás viviendo ahora por mi culpa. No te pido que de la noche a la mañana olvides todo ni que vuelvas a confiar en mí por arte de magia... solo quiero pedirte que mires un momento hacia atrás conmigo, que veas que todavía hay esperanza y que no me dejes solo.
+        </p>
+
+        <!-- Carrusel deslizable con el dedo en celular -->
+        <div class="swipe-hint">← Desliza con el dedo →</div>
+        <div class="horizontal-polaroid-strip">
+          <div class="polaroid-chip" data-lightbox="assets/media/IMG_6674.jpg" data-caption="Tu cumpleaños 26: cómo nos mirábamos ese día.">
+            <img src="assets/media/IMG_6674.jpg" alt="Cumpleaños 26" />
+            <span data-editable="chip_1">Cómo nos miramos</span>
+          </div>
+          <div class="polaroid-chip" data-lightbox="assets/media/IMG_6268.jpg" data-video="assets/media/IMG_6268.mp4" data-caption="Cumpliendo un año de novios, tú con el collar y nuestra florecita.">
+            <span class="chip-live">LIVE</span>
+            <img src="assets/media/IMG_6268.jpg" alt="Collar y flor de Lego" />
+            <span data-editable="chip_2">Siempre felices</span>
+          </div>
+          <div class="polaroid-chip" data-lightbox="assets/media/4268ffb0-ef5e-4c8b-b545-c544ce9ca0de.jpg" data-caption="Verte así de libre y feliz en el mar.">
+            <img src="assets/media/4268ffb0-ef5e-4c8b-b545-c544ce9ca0de.jpg" alt="Andy en el mar" />
+            <span data-editable="chip_3">Verte libre y feliz</span>
+          </div>
+          <div class="polaroid-chip" data-lightbox="assets/media/3F42AE21-2E88-4782-9CCB-6FF974988CBD.jpg" data-caption="Nuestras bobadas en la calle.">
+            <img src="assets/media/3F42AE21-2E88-4782-9CCB-6FF974988CBD.jpg" alt="Sacando la lengua" />
+            <span data-editable="chip_4">Nuestras bobadas</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: EL HELADO, LA PIZZA Y EL COLLAR (6 DE MARZO & 6 DE JUNIO) -->
+    <section id="el-collar" class="story-section">
+      <div class="section-card">
+        <span class="section-tag" data-editable="origen_tag">De dónde venimos</span>
+        <h2 class="card-title" data-editable="origen_title"></h2>
+
+        <div class="necklace-feature" data-lightbox="assets/media/IMG_6268.jpg" data-video="assets/media/IMG_6268.mp4" data-caption="Cumpliendo un año de ser novios, con ese collar y nuestra florecita blanca.">
+          <span class="badge-floating">● LIVE · Toca la foto</span>
+          <img src="assets/media/IMG_6268.jpg" alt="Andy con el collar del dije y Jairo" />
+          <video src="assets/media/IMG_6268.mp4" muted loop playsinline preload="metadata"></video>
+        </div>
+
+        <div class="prose-text">
+          <p data-editable="origen_p1">
+            A veces cierro los ojos y me acuerdo de aquel <strong>6 de marzo</strong>, nuestra primera salida a comer helado, cuando todavía no imaginábamos todo lo que íbamos a vivir, ni teniamos la remota idea que terminariamos juntos.
+          </p>
+          <p data-editable="origen_p2">
+            Pero sobre todo me acuerdo del <strong>6 de junio</strong>. Ese día recuerdo que estabas un poco bajoneada, pero yo sabía que ese día tenía que ser especial, así que te invité a comer pizza para levantarte el ánimo. Luego, en tu casa, yo estaba muerto de los nervios cuando te entregué aquella carta.
+          </p>
+          <div class="memory-quote-box">
+            <p data-editable="origen_quote">
+              Al final de la carta te pedía que buscaras el collar que te había regalado unos días antes y que pusieras el ojo para mirar dentro del dije... Quería que supieras que, desde días atrás, tú ya tenías en tus manos que yo quería ser tu novio, aunque ya tu por tu cuenta, y por culpa de Antonella, ya lo habías descubierto jajaja. Pero ese 6 de junio ha sido uno de los mejores días de toda mi vida.
+            </p>
+          </div>
+          <p data-editable="origen_p3">
+            Cuando veo esta foto tuya con ese collar puesto y esa florecita blanca en la mano, cumpliendo un año de ser novios, me acuerdo de ese Jairo nervioso que solo quería hacerte feliz, y de por qué hoy no estoy dispuesto a dejarte ir.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: HABLANDO DE FRENTE (LA VERDAD SIN PROMESAS VACÍAS) -->
+    <section id="de-frente" class="story-section">
+      <div class="section-card truth-card">
+        <span class="section-tag" data-editable="verdad_tag">Hablándote claro, como mereces</span>
+        <h2 class="card-title" data-editable="verdad_title">Sé por qué te duele tanto, y no busco que todo se arregle hoy</h2>
+
+        <div class="prose-text">
+          <p data-editable="verdad_p1">
+            Andy, te juro que entiendo tu decepción. Te oculté mis deudas y mis problemas por mucho tiempo y con eso rompí tu confianza. Por miedo o por creer que podía taparlo solo, hice que te sintieras engañada por la persona en la que más confiabas.
+          </p>
+          <p data-editable="verdad_p2">
+            Y para rematar, cuando te prometí el trabajo remoto para que pudieras estar tranquila, justo el primer día que empezabas me despiden. Me siento el peor hombre del mundo al ver cómo algo que te había prometido se nos caía de las manos el primer día.
+          </p>
+          <div class="pain-highlight">
+            <p data-editable="verdad_p3">
+              Pero lo que más me duele y más culpa me da todos los días es que por mi culpa hoy estés viviendo con tu mamá y tu hermana. Yo sé lo mala que es la convivencia allá. Sé que no te gusta estar ahí, y menos después de que ya te habías acostumbrado a vivir sola, a tener tu privacidad, tus cosas a tu manera y tu independencia. Cosas que allá no tienes.
+            </p>
+          </div>
+          <p data-editable="verdad_p4">
+            <strong>Por eso no vengo a hacerte más promesas falsas ni vacías.</strong> Tampoco busco redención inmediata, porque sé que no puedo pedirte que vuelvas a confiar en mí de la noche a la mañana. Sé que la confianza y tu tranquilidad se recuperan con hechos, no hablando bonito. Solo quiero que sepas que me duele en el alma haberte puesto en esa situación y que me estoy moviendo para que salgamos de este hueco.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: DAMON Y TU INDEPENDENCIA -->
+    <section id="damon" class="story-section">
+      <div class="section-card">
+        <span class="section-tag" data-editable="damon_tag">Tu paz · Tu espacio · Damon 🐾</span>
+        <h2 class="card-title" data-editable="damon_title">Esa tranquilidad tuya y de Damon la vamos a recuperar</h2>
+
+        <p class="card-intro" data-editable="damon_p1">
+          Mira a Damon en estas fotos, estirado en la cama, tranquilo con su pecherita o durmiendo hecho bolita. Esa paz de tener tu propio cuarto, tu silencio, tu cama y tu independencia sin nadie molestando no se perdió para siempre.
+        </p>
+
+        <div class="swipe-hint">← Desliza las fotos de Damon →</div>
+        <div class="damon-carousel">
+          <div class="damon-slide" data-lightbox="assets/media/01fe46ca-656a-444c-962a-2a33469ee4cb.jpg" data-caption="Damon mirándonos con sus ojazos 🐾">
+            <img src="assets/media/01fe46ca-656a-444c-962a-2a33469ee4cb.jpg" alt="Damon con pechera" />
+            <span class="slide-caption" data-editable="damon_cap1">Damon mirándonos con sus ojazos🐾</span>
+          </div>
+          <div class="damon-slide" data-lightbox="assets/media/97ed4a10-f413-4096-8f35-89869248c316.jpg" data-caption="Esa paz en la cama que tanto extrañas.">
+            <img src="assets/media/97ed4a10-f413-4096-8f35-89869248c316.jpg" alt="Damon estirado" />
+            <span class="slide-caption" data-editable="damon_cap2">Esa paz en la cama que tanto extrañas</span>
+          </div>
+          <div class="damon-slide" data-lightbox="assets/media/c8320701-7c87-4438-bd61-ef40cd78d2e0.jpg" data-caption="Tu propio espacio, sin que nadie te incomode.">
+            <img src="assets/media/c8320701-7c87-4438-bd61-ef40cd78d2e0.jpg" alt="Damon durmiendo" />
+            <span class="slide-caption" data-editable="damon_cap3">Tu propio espacio, sin que nadie te incomode</span>
+          </div>
+        </div>
+
+        <p class="prose-note" data-editable="damon_p2">
+          Sé que hoy aguantar la convivencia donde tu mamá es horrible para ti. Pero ten la certeza de que esto es temporal. Vas a volver a tener esa calma donde tú y Damon estén en paz.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 5: RAZONES PARA SEGUIR (LO BUENO QUE SOMOS) -->
+    <section id="razones" class="story-section">
+      <div class="section-header-mobile">
+        <span class="section-tag" data-editable="razones_tag">Lo que sí es real entre nosotros</span>
+        <h2 class="section-title-mobile" data-editable="razones_title">Por qué vale la pena que sigamos intentándolo</h2>
+        <p class="section-subtitle-mobile" data-editable="razones_subtitle">
+          No quiero que los problemas de hoy tapen todo lo lindo que hemos vivido.
+        </p>
+      </div>
+
+      <div class="mobile-cards-stack">
+        <!-- Razón 1 -->
+        <article class="memory-story-card">
+          <div class="media-frame" data-lightbox="assets/media/IMG_6674.jpg" data-caption="Tu cumpleaños 26: mira cómo nos miramos.">
+            <img src="assets/media/IMG_6674.jpg" alt="Cumpleaños 26 de Andy" loading="lazy" />
+            <span class="card-num">01</span>
+          </div>
+          <div class="card-body">
+            <h3 data-editable="r1_title">Por cómo nos mirábamos en tu cumpleaños 26</h3>
+            <p data-editable="r1_text">
+              Cada vez que veo esta foto me doy cuenta de que esa mirada entre tú y yo no se finge. Cuando estamos bien, nos miramos con un amor que vale la pena defender.
+            </p>
+          </div>
+        </article>
+
+        <!-- Razón 2 -->
+        <article class="memory-story-card">
+          <div class="media-frame" data-lightbox="assets/media/4268ffb0-ef5e-4c8b-b545-c544ce9ca0de.jpg" data-caption="Tú en el mar, riendo feliz.">
+            <img src="assets/media/4268ffb0-ef5e-4c8b-b545-c544ce9ca0de.jpg" alt="Andy en la playa" loading="lazy" />
+            <span class="card-num">02</span>
+          </div>
+          <div class="card-body">
+            <h3 data-editable="r2_title">Porque verte sonreír así en el mar es mi lugar favorito</h3>
+            <p data-editable="r2_text">
+              Así te quiero ver otra vez, tranquila, riéndote, sin preocupaciones encima. Recordar esa sonrisa tuya es lo que me da fuerzas hoy para levantarme y buscar trabajo sin cansarme.
+            </p>
+          </div>
+        </article>
+
+        <!-- Razón 3 (LIVE) -->
+        <article class="memory-story-card">
+          <div class="media-frame live-photo-box" data-lightbox="assets/media/IMG_8826.jpg" data-video="assets/media/IMG_8826.mp4" data-caption="Con una coquita y comida, éramos los más felices.">
+            <span class="badge-floating">● LIVE</span>
+            <span class="card-num">03</span>
+            <img src="assets/media/IMG_8826.jpg" alt="Comiendo juntos" loading="lazy" />
+            <video src="assets/media/IMG_8826.mp4" muted loop playsinline preload="metadata"></video>
+          </div>
+          <div class="card-body">
+            <h3 data-editable="r3_title">Porque con una coquita y comida, éramos los más felices</h3>
+            <p data-editable="r3_text">
+              Nosotros nunca necesitamos lujos para pasarla increíble, solo estar tranquilos y sin secretos.
+            </p>
+          </div>
+        </article>
+
+        <!-- Razón 4 -->
+        <article class="memory-story-card">
+          <div class="media-frame" data-lightbox="assets/media/ef11edc0-3f30-4b69-a570-068f43a75316.jpg" data-caption="En el cine con crispetas.">
+            <img src="assets/media/ef11edc0-3f30-4b69-a570-068f43a75316.jpg" alt="En el cine" loading="lazy" />
+            <span class="card-num">04</span>
+          </div>
+          <div class="card-body">
+            <h3 data-editable="r4_title">Por nuestras idas a cine, nuestras salidas a comer o cualquier plan</h3>
+            <p data-editable="r4_text">
+              Desde aquel primer helado, la pizza del 6 de junio o nuestras idas a cine. Contigo cualquier plan sencillo se siente especial.
+            </p>
+          </div>
+        </article>
+
+        <!-- Razón 5 -->
+        <article class="memory-story-card">
+          <div class="media-frame" data-lightbox="assets/media/3F42AE21-2E88-4782-9CCB-6FF974988CBD.jpg" data-caption="Haciendo bobadas juntos en cualquier parte.">
+            <img src="assets/media/3F42AE21-2E88-4782-9CCB-6FF974988CBD.jpg" alt="Muecas juntos" loading="lazy" />
+            <span class="card-num">05</span>
+          </div>
+          <div class="card-body">
+            <h3 data-editable="r5_title">Por la confianza de hacer bobadas juntos en cualquier parte</h3>
+            <p data-editable="r5_text">
+              Sacar la lengua en plena calle, hacernos muecas, decir cualquier bobada, hacer como gatos o ladrar como perros y reírnos de cualquier cosa. Esa complicidad tan nuestra es demasiado bonita como para dejarla morir por un mal momento.
+            </p>
+          </div>
+        </article>
+
+        <!-- Razón 6 -->
+        <article class="memory-story-card">
+          <div class="media-frame" data-lightbox="assets/media/IMG_1963.jpg" data-caption="Con la camiseta puesta, del mismo lado.">
+            <img src="assets/media/IMG_1963.jpg" alt="Con camiseta de Colombia" loading="lazy" />
+            <span class="card-num">06</span>
+          </div>
+          <div class="card-body">
+            <h3 data-editable="r6_title">Porque somos un mismo equipo</h3>
+            <p data-editable="r6_text">
+              Mi gran error fue creer que podía cargar con las deudas y mis problemas a escondidas en vez de hablarte claro. Hoy ya no tengo nada que ocultarte, sabes toda mi verdad, y desde cero quiero que estemos del mismo lado.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 6: GALERÍA DE FOTOS Y RECUERDOS (TODAS COMO FOTOS) -->
+    <section id="recuerdos" class="story-section">
+      <div class="section-header-mobile">
+        <span class="section-tag" data-editable="galeria_tag">Nuestras fotos y recuerdos</span>
+        <h2 class="section-title-mobile" data-editable="galeria_title">Recuerdos que me dan esperanza</h2>
+        <p class="section-subtitle-mobile" data-editable="galeria_subtitle">
+          Toca cualquier foto para abrirla en pantalla completa.
+        </p>
+      </div>
+
+      <div class="mobile-media-grid">
+        <!-- Foto 1 (antes IG story): Flores amarillas -->
+        <div class="grid-media-tile" data-lightbox="assets/media/b7270a5d58f740debf6309fa914762c6.jpg" data-caption="Tus flores amarillas 🌻">
+          <img src="assets/media/b7270a5d58f740debf6309fa914762c6.jpg" alt="Tus flores amarillas" loading="lazy" />
+          <div class="tile-label" data-editable="vid_1">Tus flores amarillas 🌻</div>
+        </div>
+
+        <!-- Foto 2 (antes IG story): Playa -->
+        <div class="grid-media-tile" data-lightbox="assets/media/c4c1236f97434fb2a5a1de857c0a0d2e.jpg" data-caption="En la playa juntos 🌊">
+          <img src="assets/media/c4c1236f97434fb2a5a1de857c0a0d2e.jpg" alt="En la playa juntos" loading="lazy" />
+          <div class="tile-label" data-editable="vid_2">En la playa juntos 🌊</div>
+        </div>
+
+        <!-- Foto 3 (antes IG story): Hojas verdes -->
+        <div class="grid-media-tile" data-lightbox="assets/media/f52df4362a1a4a7786de5c8b79eb5a2f.jpg" data-caption="Entre las plantas 🌿">
+          <img src="assets/media/f52df4362a1a4a7786de5c8b79eb5a2f.jpg" alt="Entre las plantas" loading="lazy" />
+          <div class="tile-label" data-editable="vid_3">Entre las plantas 🌿</div>
+        </div>
+
+        <!-- Foto: Andy vestido azul -->
+        <div class="grid-media-tile" data-lightbox="assets/media/IMG_6286.jpg" data-caption="Tú, hermosa como siempre 💙">
+          <img src="assets/media/IMG_6286.jpg" alt="Andy vestido azul" loading="lazy" />
+          <div class="tile-label" data-editable="foto_azul">Tú, hermosa como siempre 💙</div>
+        </div>
+
+        <!-- Live Photo: Cine juntos -->
+        <div class="grid-media-tile live-photo-box" data-lightbox="assets/media/IMG_6811.jpg" data-video="assets/media/IMG_6811.mp4" data-caption="En el cine 🍿">
+          <span class="tile-badge">● LIVE</span>
+          <img src="assets/media/IMG_6811.jpg" alt="En el cine" loading="lazy" />
+          <video src="assets/media/IMG_6811.mp4" muted loop playsinline preload="metadata"></video>
+          <div class="tile-label" data-editable="live_cine1">En el cine 🍿</div>
+        </div>
+
+        <!-- Live Photo: Besito Andy -->
+        <div class="grid-media-tile live-photo-box" data-lightbox="assets/media/IMG_6814.jpg" data-video="assets/media/IMG_6814.mp4" data-caption="Tus besitos 💋">
+          <span class="tile-badge">● LIVE</span>
+          <img src="assets/media/IMG_6814.jpg" alt="Besito de Andy" loading="lazy" />
+          <video src="assets/media/IMG_6814.mp4" muted loop playsinline preload="metadata"></video>
+          <div class="tile-label" data-editable="live_cine2">Tus besitos 💋</div>
+        </div>
+
+        <!-- Foto: Chaquetas -->
+        <div class="grid-media-tile" data-lightbox="assets/media/IMG_7274.jpg" data-caption="Siempre cerquita 🖤">
+          <img src="assets/media/IMG_7274.jpg" alt="Con chaquetas" loading="lazy" />
+          <div class="tile-label" data-editable="foto_chaquetas">Siempre cerquita 🖤</div>
+        </div>
+
+        <!-- Foto: Noche -->
+        <div class="grid-media-tile" data-lightbox="assets/media/D7902466-B767-41B8-8266-D99E1AB28F0A.jpg" data-caption="Noches juntos 🌙">
+          <img src="assets/media/D7902466-B767-41B8-8266-D99E1AB28F0A.jpg" alt="De noche" loading="lazy" />
+          <div class="tile-label" data-editable="foto_noche">Noches juntos 🌙</div>
+        </div>
+
+        <!-- Foto 4 (antes IG story, recortada limpia sin barras ni letra): Salidas especiales -->
+        <div class="grid-media-tile tile-wide" data-lightbox="assets/media/04cee08b364f4a5a949b1a663a6e3c60.jpg" data-caption="Salidas especiales ✨">
+          <img src="assets/media/04cee08b364f4a5a949b1a663a6e3c60.jpg" alt="Salidas especiales" loading="lazy" />
+          <div class="tile-label" data-editable="vid_4">Salidas especiales ✨</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 7: MENSAJES PARA CUANDO TE SIENTAS MAL ("ÁBRELO CUANDO...") -->
+    <section id="capsulas" class="story-section">
+      <div class="section-header-mobile">
+        <span class="section-tag" data-editable="capsulas_tag">Para leer cuando el día pese</span>
+        <h2 class="section-title-mobile" data-editable="capsulas_title">Ábrelos cuando lo necesites</h2>
+      </div>
+
+      <div class="capsules-stack">
+        <button class="capsule-mobile-btn" data-capsule="convivencia">
+          <div class="cap-left">✉</div>
+          <div class="cap-mid">
+            <span class="cap-mini">Ábrelo cuando...</span>
+            <h3 data-editable="cap1_btn_title">No soportes más la convivencia en casa de tu mamá y tu hermana</h3>
+          </div>
+          <div class="cap-arrow">›</div>
+        </button>
+
+        <button class="capsule-mobile-btn" data-capsule="confianza">
+          <div class="cap-left">✉</div>
+          <div class="cap-mid">
+            <span class="cap-mini">Ábrelo cuando...</span>
+            <h3 data-editable="cap2_btn_title">Te dé rabia o tristeza acordarte de las cosas que te oculté</h3>
+          </div>
+          <div class="cap-arrow">›</div>
+        </button>
+
+        <button class="capsule-mobile-btn" data-capsule="trabajo">
+          <div class="cap-left">✉</div>
+          <div class="cap-mid">
+            <span class="cap-mini">Ábrelo cuando...</span>
+            <h3 data-editable="cap3_btn_title">Te sientas frustrada por lo que pasó con el trabajo</h3>
+          </div>
+          <div class="cap-arrow">›</div>
+        </button>
+
+        <button class="capsule-mobile-btn" data-capsule="collar">
+          <div class="cap-left">✉</div>
+          <div class="cap-mid">
+            <span class="cap-mini">Ábrelo cuando...</span>
+            <h3 data-editable="cap4_btn_title">Mires el collar del 6 de junio y dudes de hacia dónde vamos</h3>
+          </div>
+          <div class="cap-arrow">›</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 8: CIERRE HONESTO (ESPERANZA, NO ME DEJES SOLO) -->
+    <section id="esperanza" class="story-section">
+      <div class="final-mobile-card">
+        <div class="final-duo-photos">
+          <img src="assets/media/06001DDF-016B-4158-ABAE-4F8AA1CAE8AD.jpg" alt="Andy y Jairo" />
+          <img src="assets/media/IMG_6268.jpg" alt="Con la flor de Lego" />
+        </div>
+
+        <span class="section-tag" data-editable="final_tag">Con los mismos nervios de aquel 6 de junio</span>
+        <h2 class="final-mobile-title" data-editable="final_title">No me dejes solo, Andy... sigamos intentándolo</h2>
+
+        <div class="final-prose">
+          <p data-editable="final_p1">
+            Yo sé que hoy no tengo cómo exigirte nada. Sé que recuperar tu confianza va a tomar tiempo y que las palabras no bastan cuando te he fallado.
+          </p>
+          <p data-editable="final_p2">
+            Por eso no quiero hacerte promesas vacías. Solo quiero que al ver nuestras fotos, a Damon y todo lo que hemos vivido desde aquel helado, sientas que <strong>todavía hay esperanza para nosotros</strong>.
+          </p>
+          <p data-editable="final_p3">
+            Me estoy esforzando para levantarnos, para que salgas de donde estás y recuperes tu espacio, tu privacidad y tu paz. Solo te pido que no me sueltes la mano ahora.
+          </p>
+        </div>
+
+        <div class="final-signoff">
+          <p data-editable="final_signoff">Te amo con toda mi vida, Andy. — Jairo ❤️</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- LIGHTBOX MODAL (PANTALLA COMPLETA EN CELULAR) -->
+  <div id="lightbox-modal" class="modal-backdrop" hidden>
+    <button id="lightbox-close" class="modal-close" aria-label="Cerrar">&times;</button>
+    <div class="lightbox-container">
+      <div id="lightbox-media-wrap" class="lightbox-media-wrap"></div>
+      <p id="lightbox-caption" class="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- CAPSULE LETTER MODAL -->
+  <div id="capsule-modal" class="modal-backdrop" hidden>
+    <div class="capsule-modal-card">
+      <button id="capsule-close" class="modal-close-inline" aria-label="Cerrar">&times;</button>
+      <span class="section-tag" id="capsule-modal-kicker">De Jairo para Andy</span>
+      <h3 id="capsule-modal-title" class="capsule-modal-title"></h3>
+      <div id="capsule-modal-body" class="capsule-modal-body"></div>
+      <div class="capsule-modal-footer">
+        <button id="capsule-ok-btn" class="secondary-glass-btn full-width-btn">Cerrar carta ♥</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PESTAÑA / PANEL DE EDICIÓN Y APROBACIÓN DE TEXTOS PARA JAIRO -->
+  <aside id="editor-drawer" class="editor-drawer" hidden>
+    <div class="editor-drawer-header">
+      <div>
+        <h3>✏️ Editor de Textos para Jairo</h3>
+        <p>Modifica cualquier título o párrafo aquí mismo. Los cambios se ven al instante y quedan guardados.</p>
+      </div>
+      <button id="close-editor-btn" class="modal-close-inline" aria-label="Cerrar editor">&times;</button>
+    </div>
+
+    <div class="editor-toolbar">
+      <button id="hide-editor-btn" class="editor-action-btn" title="Oculta el botón de editar para cuando se lo envíes a Andy">
+        👁️ Modo Vista Andy (Ocultar botón Editar)
+      </button>
+      <button id="export-texts-btn" class="editor-action-btn primary-action">
+        📋 Copiar textos editados
+      </button>
+      <button id="reset-texts-btn" class="editor-action-btn danger-action">
+        ↺ Restaurar originales
+      </button>
+    </div>
+
+    <div id="editor-fields-container" class="editor-fields-container">
+      <!-- Se llena dinámicamente con todos los textos y títulos de la página -->
+    </div>
+  </aside>
+
+  <script src="script.js"></script>
+</body>
+</html>
