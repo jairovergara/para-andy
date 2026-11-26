@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 10. REAL-TIME VISIT & READING TRACKER (Para que Jairo sepa si Andy la vio)
   // ==========================================================================
   const NTFY_TOPIC = 'jairo_andy_visitas_7d01d9';
-  const JAIRO_FLAG_KEY = 'es_dispositivo_de_jairo_v1';
+  const JAIRO_FLAG_KEY = 'es_dispositivo_de_jairo_v2';
   const SESSION_ID = Math.random().toString(36).substring(2, 7).toUpperCase();
 
   const isVisitsPanelUrl = window.location.search.includes('visitas=1');
