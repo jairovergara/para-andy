@@ -284,14 +284,54 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // 10. REAL-TIME VISIT & READING TRACKER (Para que Jairo sepa si Andy la vio)
+  // 10. REAL-TIME VISIT & READING TRACKER CON DIFERENCIACIÓN POR IP Y DISPOSITIVO
   // ==========================================================================
   const NTFY_TOPIC = 'jairo_andy_visitas_7d01d9';
   const JAIRO_FLAG_KEY = 'es_dispositivo_de_jairo_v2';
-  const SESSION_ID = Math.random().toString(36).substring(2, 7).toUpperCase();
+  const DEVICE_ID_KEY = 'visitor_device_uid_v1';
+  const KNOWN_JAIRO_IPS_KEY = 'jairo_known_ips_v1';
+  const DEFAULT_JAIRO_IP = '191.108.201.176'; // Tu IP Wi-Fi actual detectada
+  const SESSION_ID = Math.random().toString(36).substring(2, 6).toUpperCase();
 
   const isVisitsPanelUrl = window.location.search.includes('visitas=1');
   const isEditPanelUrl = window.location.search.includes('edit=1');
+
+  function getOrCreateDeviceId() {
+    try {
+      let id = localStorage.getItem(DEVICE_ID_KEY);
+      if (!id) {
+        id = 'CEL-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        localStorage.setItem(DEVICE_ID_KEY, id);
+      }
+      return id;
+    } catch (e) {
+      return 'CEL-' + SESSION_ID;
+    }
+  }
+
+  const MY_DEVICE_ID = getOrCreateDeviceId();
+
+  function getKnownJairoIps() {
+    try {
+      const raw = localStorage.getItem(KNOWN_JAIRO_IPS_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      if (!list.includes(DEFAULT_JAIRO_IP)) list.push(DEFAULT_JAIRO_IP);
+      return list;
+    } catch (e) {
+      return [DEFAULT_JAIRO_IP];
+    }
+  }
+
+  function addKnownJairoIp(ipOrDev) {
+    if (!ipOrDev) return;
+    try {
+      const list = getKnownJairoIps();
+      if (!list.includes(ipOrDev)) {
+        list.push(ipOrDev);
+        localStorage.setItem(KNOWN_JAIRO_IPS_KEY, JSON.stringify(list));
+      }
+    } catch (e) {}
+  }
 
   function isJairoDevice() {
     try {
@@ -303,32 +343,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getDeviceLabel() {
     const ua = navigator.userAgent || '';
-    if (/iPhone/i.test(ua)) return '📱 iPhone';
-    if (/iPad/i.test(ua)) return '📱 iPad';
-    if (/Android/i.test(ua)) return '📱 Android';
-    if (/Macintosh|Mac OS/i.test(ua)) return '💻 Mac';
-    if (/Windows/i.test(ua)) return '💻 PC Windows';
-    return '📱 Celular / Navegador';
+    const screenRes = `${window.screen.width}x${window.screen.height}`;
+    if (/iPhone/i.test(ua)) return `📱 iPhone (${screenRes})`;
+    if (/iPad/i.test(ua)) return `📱 iPad (${screenRes})`;
+    if (/Android/i.test(ua)) {
+      const match = ua.match(/Android\s([0-9.]+);\s([^;)]+)/i);
+      const model = match && match[2] ? match[2].trim() : 'Android';
+      return `📱 ${model} (${screenRes})`;
+    }
+    if (/Macintosh|Mac OS/i.test(ua)) return `💻 Mac (${screenRes})`;
+    if (/Windows/i.test(ua)) return `💻 PC Windows (${screenRes})`;
+    return `📱 Celular (${screenRes})`;
+  }
+
+  // Obtener IP pública y Operador (ISP) una sola vez por sesión
+  let visitorNetInfoPromise = null;
+  function getVisitorNetInfo() {
+    if (visitorNetInfoPromise) return visitorNetInfoPromise;
+    visitorNetInfoPromise = fetch('https://ipwho.is/')
+      .then((r) => r.json())
+      .then((data) => ({
+        ip: data.ip || 'Desconocida',
+        isp: (data.connection && data.connection.isp) || data.org || '',
+        city: data.city || ''
+      }))
+      .catch(() =>
+        fetch('https://api.ipify.org?format=json')
+          .then((r) => r.json())
+          .then((d) => ({ ip: d.ip || 'Desconocida', isp: '', city: '' }))
+          .catch(() => ({ ip: 'Desconocida', isp: '', city: '' }))
+      );
+    return visitorNetInfoPromise;
+  }
+
+  // Si Jairo abre ?visitas=1, guardamos automáticamente su IP actual y su DeviceID como "De Jairo"
+  if (isVisitsPanelUrl || isEditPanelUrl) {
+    addKnownJairoIp(MY_DEVICE_ID);
+    getVisitorNetInfo().then((net) => {
+      if (net.ip && net.ip !== 'Desconocida') {
+        addKnownJairoIp(net.ip);
+      }
+    });
   }
 
   const sentEvents = new Set();
 
-  function trackAndyEvent(actionLabel, allowRepeat = false) {
-    // No registrar cuando Jairo entra directamente al panel ?visitas=1 o ?edit=1
+  async function trackAndyEvent(actionLabel, allowRepeat = false) {
     if (isVisitsPanelUrl || isEditPanelUrl) return;
     if (isJairoDevice()) return;
     if (!allowRepeat && sentEvents.has(actionLabel)) return;
     sentEvents.add(actionLabel);
 
+    const net = await getVisitorNetInfo();
+
     const payload = {
-      who: 'Andy',
       session: SESSION_ID,
+      deviceId: MY_DEVICE_ID,
+      ip: net.ip,
+      isp: net.isp,
+      city: net.city,
       device: getDeviceLabel(),
       action: actionLabel,
       ts: Date.now()
     };
 
-    // Sin headers personalizados con emojis (que bloqueaban fetch en iOS/Chrome)
     fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -411,25 +489,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const visitsDrawer = document.getElementById('visits-drawer');
   const closeVisitsBtn = document.getElementById('close-visits-btn');
   const refreshVisitsBtn = document.getElementById('refresh-visits-btn');
+  const filterAndyOnlyBtn = document.getElementById('filter-andy-only-btn');
   const toggleIgnoreMeBtn = document.getElementById('toggle-ignore-me-btn');
   const visitsSummaryBox = document.getElementById('visits-summary-box');
   const visitsListContainer = document.getElementById('visits-list-container');
 
+  let showAndyOnly = false;
+
   function updateIgnoreBtnLabel() {
     if (!toggleIgnoreMeBtn) return;
     if (isJairoDevice()) {
-      toggleIgnoreMeBtn.textContent = '🚫 Este navegador está ignorado (Toca para activar pruebas aquí)';
+      toggleIgnoreMeBtn.textContent = '🚫 Este navegador está silenciado (Toca para reactivar)';
     } else {
-      toggleIgnoreMeBtn.textContent = '🛡️ Ignorar mis visitas desde este navegador';
+      toggleIgnoreMeBtn.textContent = '🛡️ Silenciar mis futuras visitas desde este navegador';
     }
+  }
+
+  function checkIsJairoEvent(ev) {
+    const known = getKnownJairoIps();
+    if (ev.ip && known.includes(ev.ip)) return true;
+    if (ev.deviceId && known.includes(ev.deviceId)) return true;
+    return false;
   }
 
   async function loadVisitsHistory() {
     if (!visitsListContainer || !visitsSummaryBox) return;
-    visitsSummaryBox.innerHTML = 'Cargando registro en vivo...';
+    visitsSummaryBox.innerHTML = 'Cargando registro en vivo e identificando IPs...';
     visitsListContainer.innerHTML = '';
 
     try {
+      const myNet = await getVisitorNetInfo();
+      if (myNet.ip && myNet.ip !== 'Desconocida') {
+        addKnownJairoIp(myNet.ip);
+      }
+
       const res = await fetch(
         `https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=all&_t=${Date.now()}`,
         { cache: 'no-store' }
@@ -440,14 +533,14 @@ document.addEventListener('DOMContentLoaded', () => {
         .split('\n')
         .filter((l) => l.trim().length > 0);
 
-      const events = [];
+      const allEvents = [];
       lines.forEach((line) => {
         try {
           const item = JSON.parse(line);
           if (item.event === 'message' && item.message) {
             const parsed = JSON.parse(item.message);
             if (parsed && parsed.action) {
-              events.push({
+              allEvents.push({
                 ...parsed,
                 serverTime: item.time * 1000
               });
@@ -456,28 +549,44 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {}
       });
 
-      events.reverse(); // Más recientes primero
+      allEvents.reverse(); // Más recientes primero
 
-      const sessions = new Set(events.map((e) => e.session));
-      const reachedEnd = events.some((e) => e.action && e.action.includes('final'));
+      const andyEvents = allEvents.filter((e) => !checkIsJairoEvent(e));
+      const jairoEvents = allEvents.filter((e) => checkIsJairoEvent(e));
+      const eventsToDisplay = showAndyOnly ? andyEvents : allEvents;
 
-      if (events.length === 0) {
-        visitsSummaryBox.innerHTML = `
-          <strong>Aún no se registran visitas de Andy.</strong><br/>
-          Apenas ella abra el enlace desde su celular, verás aquí la hora exacta, su dispositivo y cada sección o sobre que abra.
+      const andySessions = new Set(andyEvents.map((e) => e.session));
+      const andyReachedEnd = andyEvents.some((e) => e.action && e.action.includes('final'));
+
+      visitsSummaryBox.innerHTML = `
+        <div style="margin-bottom:0.45rem;">
+          <strong>🏠 Tu IP actual (Jairo):</strong> <code>${myNet.ip}</code> ${myNet.city ? `(${myNet.city})` : ''}
+        </div>
+        <div>
+          <strong>💖 Visitas de Andy (Otra IP diferente a la tuya):</strong>
+          ${
+            andyEvents.length > 0
+              ? `<span style="color:#ffb8ae;font-weight:700;">¡SÍ! ${andyEvents.length} acciones en ${andySessions.size} sesión(es)</span>`
+              : `<span style="color:#c9b8b4;">0 todavía (solo hay ${jairoEvents.length} eventos desde tu propia IP/dispositivo)</span>`
+          }
+          ${andyReachedEnd ? '<br/><span style="color:#f3c892;">🤍 ¡Andy llegó a leer hasta el final de la página!</span>' : ''}
+        </div>
+      `;
+
+      if (eventsToDisplay.length === 0) {
+        visitsListContainer.innerHTML = `
+          <div class="editor-field-group" style="text-align:center;color:#c9b8b4;">
+            No hay eventos de otra IP todavía. (Si quieres ver tus propias pruebas, toca el botón de filtro arriba).
+          </div>
         `;
         return;
       }
 
-      visitsSummaryBox.innerHTML = `
-        <strong>🎉 ¡Sí! Se han registrado ${events.length} acciones en ${sessions.size} visita(s).</strong><br/>
-        Última actividad: <strong>${new Date(events[0].ts || events[0].serverTime).toLocaleString('es-CO')}</strong> · Dispositivo: <strong>${events[0].device}</strong>
-        ${reachedEnd ? '<br/><span style="color:#f3c892;">🤍 ¡Llegó a leer hasta el final de la página!</span>' : ''}
-      `;
-
-      events.forEach((ev) => {
+      eventsToDisplay.forEach((ev) => {
+        const isMine = checkIsJairoEvent(ev);
         const card = document.createElement('div');
-        card.className = 'visit-event-card andy-event';
+        card.className = `visit-event-card ${isMine ? 'jairo-event' : 'andy-event'}`;
+
         const dateStr = new Date(ev.ts || ev.serverTime).toLocaleTimeString('es-CO', {
           hour: '2-digit',
           minute: '2-digit',
@@ -488,18 +597,53 @@ document.addEventListener('DOMContentLoaded', () => {
           month: 'short'
         });
 
+        const ipText = ev.ip ? `IP: ${ev.ip}` : 'IP no registrada (prueba anterior)';
+        const ispText = ev.isp ? ` · ${ev.isp}` : '';
+        const cityText = ev.city ? ` (${ev.city})` : '';
+        const devIdText = ev.deviceId ? ` · ID: ${ev.deviceId}` : '';
+
         card.innerHTML = `
           <div>
+            <span class="who-pill ${isMine ? 'jairo' : 'andy'}">
+              ${isMine ? '🧪 TU RED / TU DISPOSITIVO (Jairo)' : '💖 OTRA IP / POSIBLE ANDY'}
+            </span>
             <div class="visit-event-main">${ev.action}</div>
-            <div class="visit-event-meta">${ev.device} · Sesión #${ev.session}</div>
+            <div class="visit-event-meta">
+              <strong>${ev.device || 'Celular'}</strong> · ${ipText}${cityText}${ispText}${devIdText} · Sesión #${ev.session}
+            </div>
+            ${
+              !isMine && (ev.ip || ev.deviceId)
+                ? `<button class="mark-mine-mini-btn" data-mark-ip="${ev.ip || ''}" data-mark-dev="${ev.deviceId || ''}">Es mi celular con datos (Marcar como mío)</button>`
+                : ''
+            }
           </div>
           <div class="visit-event-time">${dayStr}, ${dateStr}</div>
         `;
         visitsListContainer.appendChild(card);
       });
+
+      visitsListContainer.querySelectorAll('.mark-mine-mini-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const ipToMark = btn.getAttribute('data-mark-ip');
+          const devToMark = btn.getAttribute('data-mark-dev');
+          if (ipToMark && ipToMark !== 'Desconocida') addKnownJairoIp(ipToMark);
+          if (devToMark) addKnownJairoIp(devToMark);
+          loadVisitsHistory();
+        });
+      });
     } catch (err) {
       visitsSummaryBox.innerHTML = 'No se pudo cargar el historial en este momento. Toca "Actualizar ahora".';
     }
+  }
+
+  if (filterAndyOnlyBtn) {
+    filterAndyOnlyBtn.addEventListener('click', () => {
+      showAndyOnly = !showAndyOnly;
+      filterAndyOnlyBtn.textContent = showAndyOnly
+        ? '💖 Filtro: Viendo SOLO Andy (Otras IPs)'
+        : '📋 Filtro: Viendo Todas (Andy + Mis pruebas)';
+      loadVisitsHistory();
+    });
   }
 
   if (window.location.search.includes('visitas=1') && visitsDrawer) {

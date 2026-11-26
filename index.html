@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <!-- Ambient Background Canvas -->
@@ -487,12 +487,12 @@
       <button id="refresh-visits-btn" class="editor-action-btn primary-action">
         🔄 Actualizar ahora
       </button>
-      <button id="toggle-ignore-me-btn" class="editor-action-btn">
-        🛡️ Este dispositivo es mío (No contar mis visitas)
+      <button id="filter-andy-only-btn" class="editor-action-btn">
+        💖 Filtro: Viendo Todas (Toca para ver solo Andy)
       </button>
-      <a href="https://ntfy.sh/jairo_andy_visitas_7d01d9" target="_blank" rel="noopener" class="editor-action-btn" style="text-decoration:none;">
-        🔔 Ver alertas en vivo (ntfy)
-      </a>
+      <button id="toggle-ignore-me-btn" class="editor-action-btn">
+        🛡️ No registrar más visitas desde este navegador
+      </button>
     </div>
 
     <div id="visits-summary-box" class="visits-summary-box"></div>
@@ -526,6 +526,6 @@
     </div>
   </aside>
 
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>
