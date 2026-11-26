@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="theme-color" content="#0d090b" />
   <title>Para Andy — De Jairo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
   <!-- Ambient Background Canvas -->
@@ -487,11 +490,14 @@
       <button id="refresh-visits-btn" class="editor-action-btn primary-action">
         🔄 Actualizar ahora
       </button>
+      <button id="clear-visits-btn" class="editor-action-btn danger-action">
+        🗑️ Limpiar todo el registro
+      </button>
       <button id="filter-andy-only-btn" class="editor-action-btn">
         💖 Filtro: Viendo Todas (Toca para ver solo Andy)
       </button>
       <button id="toggle-ignore-me-btn" class="editor-action-btn">
-        🛡️ No registrar más visitas desde este navegador
+        🛡️ Silenciar mis visitas desde este navegador
       </button>
     </div>
 
@@ -526,6 +532,6 @@
     </div>
   </aside>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>

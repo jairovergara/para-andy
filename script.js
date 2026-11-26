@@ -356,23 +356,49 @@ document.addEventListener('DOMContentLoaded', () => {
     return `📱 Celular (${screenRes})`;
   }
 
-  // Obtener IP pública y Operador (ISP) una sola vez por sesión
+  // Obtener IP pública usando Cloudflare 1.1.1.1 (nunca bloqueado en iPhone) + ipwho.is para ciudad/operador
   let visitorNetInfoPromise = null;
+
+  function fetchWithTimeout(url, ms = 2200) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    return fetch(url, { signal: ctrl.signal, cache: 'no-store' }).finally(() =>
+      clearTimeout(timer)
+    );
+  }
+
   function getVisitorNetInfo() {
     if (visitorNetInfoPromise) return visitorNetInfoPromise;
-    visitorNetInfoPromise = fetch('https://ipwho.is/')
+
+    const cfTracePromise = fetchWithTimeout('https://1.1.1.1/cdn-cgi/trace', 2200)
+      .then((r) => r.text())
+      .then((txt) => {
+        const mIp = txt.match(/ip=([^\r\n]+)/);
+        const mLoc = txt.match(/loc=([^\r\n]+)/);
+        return {
+          ip: mIp ? mIp[1].trim() : '',
+          loc: mLoc ? mLoc[1].trim() : ''
+        };
+      })
+      .catch(() => ({ ip: '', loc: '' }));
+
+    const ipWhoPromise = fetchWithTimeout('https://ipwho.is/', 2200)
       .then((r) => r.json())
       .then((data) => ({
-        ip: data.ip || 'Desconocida',
+        ip: data.ip || '',
         isp: (data.connection && data.connection.isp) || data.org || '',
         city: data.city || ''
       }))
-      .catch(() =>
-        fetch('https://api.ipify.org?format=json')
-          .then((r) => r.json())
-          .then((d) => ({ ip: d.ip || 'Desconocida', isp: '', city: '' }))
-          .catch(() => ({ ip: 'Desconocida', isp: '', city: '' }))
-      );
+      .catch(() => ({ ip: '', isp: '', city: '' }));
+
+    visitorNetInfoPromise = Promise.all([cfTracePromise, ipWhoPromise]).then(
+      ([cf, who]) => ({
+        ip: cf.ip || who.ip || 'IP oculta por navegador',
+        isp: who.isp || '',
+        city: who.city || cf.loc || ''
+      })
+    );
+
     return visitorNetInfoPromise;
   }
 
@@ -489,12 +515,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const visitsDrawer = document.getElementById('visits-drawer');
   const closeVisitsBtn = document.getElementById('close-visits-btn');
   const refreshVisitsBtn = document.getElementById('refresh-visits-btn');
+  const clearVisitsBtn = document.getElementById('clear-visits-btn');
   const filterAndyOnlyBtn = document.getElementById('filter-andy-only-btn');
   const toggleIgnoreMeBtn = document.getElementById('toggle-ignore-me-btn');
   const visitsSummaryBox = document.getElementById('visits-summary-box');
   const visitsListContainer = document.getElementById('visits-list-container');
+  const CLEAR_TS_KEY = 'jairo_visits_cleared_at_v1';
 
   let showAndyOnly = false;
+
+  function getLocalClearedAt() {
+    try {
+      return Number(localStorage.getItem(CLEAR_TS_KEY) || '0');
+    } catch (e) {
+      return 0;
+    }
+  }
 
   function updateIgnoreBtnLabel() {
     if (!toggleIgnoreMeBtn) return;
@@ -533,14 +569,20 @@ document.addEventListener('DOMContentLoaded', () => {
         .split('\n')
         .filter((l) => l.trim().length > 0);
 
-      const allEvents = [];
+      const rawEvents = [];
+      let latestClearTs = getLocalClearedAt();
+
       lines.forEach((line) => {
         try {
           const item = JSON.parse(line);
           if (item.event === 'message' && item.message) {
             const parsed = JSON.parse(item.message);
-            if (parsed && parsed.action) {
-              allEvents.push({
+            const evTime = parsed.ts || item.time * 1000;
+            if (parsed && parsed.type === 'CLEAR_ALL') {
+              const clearTime = parsed.clearedAt || evTime;
+              if (clearTime > latestClearTs) latestClearTs = clearTime;
+            } else if (parsed && parsed.action) {
+              rawEvents.push({
                 ...parsed,
                 serverTime: item.time * 1000
               });
@@ -548,6 +590,10 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } catch (e) {}
       });
+
+      const allEvents = rawEvents.filter(
+        (ev) => (ev.ts || ev.serverTime) > latestClearTs
+      );
 
       allEvents.reverse(); // Más recientes primero
 
@@ -660,6 +706,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (refreshVisitsBtn) {
     refreshVisitsBtn.addEventListener('click', loadVisitsHistory);
+  }
+
+  if (clearVisitsBtn) {
+    clearVisitsBtn.addEventListener('click', async () => {
+      const now = Date.now();
+      try {
+        localStorage.setItem(CLEAR_TS_KEY, String(now));
+      } catch (e) {}
+      clearVisitsBtn.textContent = '⏳ Limpiando...';
+      await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        body: JSON.stringify({ type: 'CLEAR_ALL', clearedAt: now, ts: now })
+      }).catch(() => {});
+      clearVisitsBtn.textContent = '🗑️ Limpiar todo el registro';
+      loadVisitsHistory();
+    });
   }
 
   if (toggleIgnoreMeBtn) {
