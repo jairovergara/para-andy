@@ -290,16 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const JAIRO_FLAG_KEY = 'es_dispositivo_de_jairo_v1';
   const SESSION_ID = Math.random().toString(36).substring(2, 7).toUpperCase();
 
-  const isVisitsPanelUrl =
-    window.location.search.includes('visitas=1') ||
-    window.location.search.includes('edit=1');
-
-  // Si entra con ?visitas=1 o ?edit=1, marcamos automáticamente este navegador como de Jairo
-  if (isVisitsPanelUrl) {
-    try {
-      localStorage.setItem(JAIRO_FLAG_KEY, '1');
-    } catch (e) {}
-  }
+  const isVisitsPanelUrl = window.location.search.includes('visitas=1');
+  const isEditPanelUrl = window.location.search.includes('edit=1');
 
   function isJairoDevice() {
     try {
@@ -316,13 +308,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (/Android/i.test(ua)) return '📱 Android';
     if (/Macintosh|Mac OS/i.test(ua)) return '💻 Mac';
     if (/Windows/i.test(ua)) return '💻 PC Windows';
-    return '📱 Dispositivo';
+    return '📱 Celular / Navegador';
   }
 
   const sentEvents = new Set();
 
   function trackAndyEvent(actionLabel, allowRepeat = false) {
-    if (isJairoDevice() || isVisitsPanelUrl) return;
+    // No registrar cuando Jairo entra directamente al panel ?visitas=1 o ?edit=1
+    if (isVisitsPanelUrl || isEditPanelUrl) return;
+    if (isJairoDevice()) return;
     if (!allowRepeat && sentEvents.has(actionLabel)) return;
     sentEvents.add(actionLabel);
 
@@ -334,13 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ts: Date.now()
     };
 
+    // Sin headers personalizados con emojis (que bloqueaban fetch en iOS/Chrome)
     fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
       method: 'POST',
-      headers: {
-        Title: `Andy (${payload.device})`,
-        Tags: 'heart'
-      },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      keepalive: true
     }).catch(() => {});
   }
 
@@ -426,9 +418,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateIgnoreBtnLabel() {
     if (!toggleIgnoreMeBtn) return;
     if (isJairoDevice()) {
-      toggleIgnoreMeBtn.textContent = '✅ Este dispositivo es tuyo (Tus visitas NO se cuentan)';
+      toggleIgnoreMeBtn.textContent = '🚫 Este navegador está ignorado (Toca para activar pruebas aquí)';
     } else {
-      toggleIgnoreMeBtn.textContent = '⚠️ Toca aquí para marcar este dispositivo como tuyo';
+      toggleIgnoreMeBtn.textContent = '🛡️ Ignorar mis visitas desde este navegador';
     }
   }
 
@@ -438,7 +430,10 @@ document.addEventListener('DOMContentLoaded', () => {
     visitsListContainer.innerHTML = '';
 
     try {
-      const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=all`);
+      const res = await fetch(
+        `https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=all&_t=${Date.now()}`,
+        { cache: 'no-store' }
+      );
       const text = await res.text();
       const lines = text
         .trim()
@@ -451,10 +446,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const item = JSON.parse(line);
           if (item.event === 'message' && item.message) {
             const parsed = JSON.parse(item.message);
-            events.push({
-              ...parsed,
-              serverTime: item.time * 1000
-            });
+            if (parsed && parsed.action) {
+              events.push({
+                ...parsed,
+                serverTime: item.time * 1000
+              });
+            }
           }
         } catch (e) {}
       });
