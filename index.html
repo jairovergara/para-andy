@@ -473,6 +473,32 @@
     </div>
   </div>
 
+  <!-- PESTAÑA / PANEL DE VISITAS EN TIEMPO REAL PARA JAIRO (?visitas=1) -->
+  <aside id="visits-drawer" class="editor-drawer" hidden>
+    <div class="editor-drawer-header">
+      <div>
+        <h3>📊 ¿Ya la vio Andy? (Registro en vivo)</h3>
+        <p>Aquí aparece en tiempo real cada vez que Andy abre el link, hasta qué sección baja leyendo y qué sobres abre.</p>
+      </div>
+      <button id="close-visits-btn" class="modal-close-inline" aria-label="Cerrar panel">&times;</button>
+    </div>
+
+    <div class="editor-toolbar">
+      <button id="refresh-visits-btn" class="editor-action-btn primary-action">
+        🔄 Actualizar ahora
+      </button>
+      <button id="toggle-ignore-me-btn" class="editor-action-btn">
+        🛡️ Este dispositivo es mío (No contar mis visitas)
+      </button>
+      <a href="https://ntfy.sh/jairo_andy_visitas_7d01d9" target="_blank" rel="noopener" class="editor-action-btn" style="text-decoration:none;">
+        🔔 Ver alertas en vivo (ntfy)
+      </a>
+    </div>
+
+    <div id="visits-summary-box" class="visits-summary-box"></div>
+    <div id="visits-list-container" class="editor-fields-container"></div>
+  </aside>
+
   <!-- PESTAÑA / PANEL DE EDICIÓN Y APROBACIÓN DE TEXTOS PARA JAIRO -->
   <aside id="editor-drawer" class="editor-drawer" hidden>
     <div class="editor-drawer-header">

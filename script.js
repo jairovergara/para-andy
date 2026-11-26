@@ -283,6 +283,257 @@ document.addEventListener('DOMContentLoaded', () => {
     openEditorBtn.classList.remove('hidden-for-andy');
   }
 
+  // ==========================================================================
+  // 10. REAL-TIME VISIT & READING TRACKER (Para que Jairo sepa si Andy la vio)
+  // ==========================================================================
+  const NTFY_TOPIC = 'jairo_andy_visitas_7d01d9';
+  const JAIRO_FLAG_KEY = 'es_dispositivo_de_jairo_v1';
+  const SESSION_ID = Math.random().toString(36).substring(2, 7).toUpperCase();
+
+  const isVisitsPanelUrl =
+    window.location.search.includes('visitas=1') ||
+    window.location.search.includes('edit=1');
+
+  // Si entra con ?visitas=1 o ?edit=1, marcamos automáticamente este navegador como de Jairo
+  if (isVisitsPanelUrl) {
+    try {
+      localStorage.setItem(JAIRO_FLAG_KEY, '1');
+    } catch (e) {}
+  }
+
+  function isJairoDevice() {
+    try {
+      return localStorage.getItem(JAIRO_FLAG_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function getDeviceLabel() {
+    const ua = navigator.userAgent || '';
+    if (/iPhone/i.test(ua)) return '📱 iPhone';
+    if (/iPad/i.test(ua)) return '📱 iPad';
+    if (/Android/i.test(ua)) return '📱 Android';
+    if (/Macintosh|Mac OS/i.test(ua)) return '💻 Mac';
+    if (/Windows/i.test(ua)) return '💻 PC Windows';
+    return '📱 Dispositivo';
+  }
+
+  const sentEvents = new Set();
+
+  function trackAndyEvent(actionLabel, allowRepeat = false) {
+    if (isJairoDevice() || isVisitsPanelUrl) return;
+    if (!allowRepeat && sentEvents.has(actionLabel)) return;
+    sentEvents.add(actionLabel);
+
+    const payload = {
+      who: 'Andy',
+      session: SESSION_ID,
+      device: getDeviceLabel(),
+      action: actionLabel,
+      ts: Date.now()
+    };
+
+    fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+      method: 'POST',
+      headers: {
+        Title: `Andy (${payload.device})`,
+        Tags: 'heart'
+      },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  }
+
+  // 1) Registrar apenas abre el link
+  trackAndyEvent('👀 Abrió el link (Vio la portada)');
+
+  // 2) Registrar cuando toca "Entrar y leer a Jairo"
+  if (openLetterBtn) {
+    openLetterBtn.addEventListener('click', () => {
+      trackAndyEvent('💌 Tocó "Entrar y leer a Jairo"');
+    });
+  }
+
+  // 3) Registrar cada sección que va leyendo al bajar
+  const sectionNames = {
+    inicio: '📖 Leyó el Inicio (Foto principal)',
+    'el-collar': '项链 Leyó la historia del 6 de marzo y el collar del 6 de junio',
+    'de-frente': '❤️‍🩹 Leyó "Hablándote claro" (Las deudas, el trabajo y donde vive hoy)',
+    damon: '🐾 Vio la sección de Damon y su espacio',
+    razones: '✨ Leyó las 6 Razones para seguir intentándolo',
+    recuerdos: '📸 Vio la galería de fotos y recuerdos',
+    capsulas: '✉️ Llegó a los sobres "Ábrelo cuando..."',
+    esperanza: '🤍 Llegó hasta el final ("No me dejes solo, Andy")'
+  };
+
+  const trackSectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+          const id = entry.target.id;
+          if (id && sectionNames[id]) {
+            trackAndyEvent(sectionNames[id]);
+          }
+        }
+      });
+    },
+    { threshold: [0.55] }
+  );
+
+  document.querySelectorAll('.story-section').forEach((sec) => {
+    trackSectionObserver.observe(sec);
+  });
+
+  // 4) Registrar si abre alguno de los 4 sobres "Ábrelo cuando..."
+  const capsuleTrackNames = {
+    convivencia: '📬 Abrió el sobre: "No soportes más la convivencia en casa de tu mamá..."',
+    confianza: '📬 Abrió el sobre: "Te dé rabia o tristeza acordarte de las cosas que te oculté"',
+    trabajo: '📬 Abrió el sobre: "Te sientas frustrada por lo que pasó con el trabajo"',
+    collar: '📬 Abrió el sobre: "Mires el collar del 6 de junio y dudes..."'
+  };
+
+  document.querySelectorAll('[data-capsule]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const k = btn.getAttribute('data-capsule');
+      if (capsuleTrackNames[k]) {
+        trackAndyEvent(capsuleTrackNames[k], true);
+      }
+    });
+  });
+
+  // 5) Registrar si toca una foto para verla en grande
+  document.querySelectorAll('[data-lightbox]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const cap = el.getAttribute('data-caption') || 'una foto';
+      trackAndyEvent(`🖼️ Abrió en grande: "${cap}"`, true);
+    });
+  });
+
+  // 6) Registrar tiempo de lectura (al cumplir 1 min y 3 min en la página)
+  setTimeout(() => trackAndyEvent('⏱️ Lleva 1 minuto leyendo la página'), 60000);
+  setTimeout(() => trackAndyEvent('⏱️ Lleva 3 minutos leyendo la página'), 180000);
+
+  // ==========================================================================
+  // PANEL DE VISITAS PARA JAIRO (?visitas=1)
+  // ==========================================================================
+  const visitsDrawer = document.getElementById('visits-drawer');
+  const closeVisitsBtn = document.getElementById('close-visits-btn');
+  const refreshVisitsBtn = document.getElementById('refresh-visits-btn');
+  const toggleIgnoreMeBtn = document.getElementById('toggle-ignore-me-btn');
+  const visitsSummaryBox = document.getElementById('visits-summary-box');
+  const visitsListContainer = document.getElementById('visits-list-container');
+
+  function updateIgnoreBtnLabel() {
+    if (!toggleIgnoreMeBtn) return;
+    if (isJairoDevice()) {
+      toggleIgnoreMeBtn.textContent = '✅ Este dispositivo es tuyo (Tus visitas NO se cuentan)';
+    } else {
+      toggleIgnoreMeBtn.textContent = '⚠️ Toca aquí para marcar este dispositivo como tuyo';
+    }
+  }
+
+  async function loadVisitsHistory() {
+    if (!visitsListContainer || !visitsSummaryBox) return;
+    visitsSummaryBox.innerHTML = 'Cargando registro en vivo...';
+    visitsListContainer.innerHTML = '';
+
+    try {
+      const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=all`);
+      const text = await res.text();
+      const lines = text
+        .trim()
+        .split('\n')
+        .filter((l) => l.trim().length > 0);
+
+      const events = [];
+      lines.forEach((line) => {
+        try {
+          const item = JSON.parse(line);
+          if (item.event === 'message' && item.message) {
+            const parsed = JSON.parse(item.message);
+            events.push({
+              ...parsed,
+              serverTime: item.time * 1000
+            });
+          }
+        } catch (e) {}
+      });
+
+      events.reverse(); // Más recientes primero
+
+      const sessions = new Set(events.map((e) => e.session));
+      const reachedEnd = events.some((e) => e.action && e.action.includes('final'));
+
+      if (events.length === 0) {
+        visitsSummaryBox.innerHTML = `
+          <strong>Aún no se registran visitas de Andy.</strong><br/>
+          Apenas ella abra el enlace desde su celular, verás aquí la hora exacta, su dispositivo y cada sección o sobre que abra.
+        `;
+        return;
+      }
+
+      visitsSummaryBox.innerHTML = `
+        <strong>🎉 ¡Sí! Se han registrado ${events.length} acciones en ${sessions.size} visita(s).</strong><br/>
+        Última actividad: <strong>${new Date(events[0].ts || events[0].serverTime).toLocaleString('es-CO')}</strong> · Dispositivo: <strong>${events[0].device}</strong>
+        ${reachedEnd ? '<br/><span style="color:#f3c892;">🤍 ¡Llegó a leer hasta el final de la página!</span>' : ''}
+      `;
+
+      events.forEach((ev) => {
+        const card = document.createElement('div');
+        card.className = 'visit-event-card andy-event';
+        const dateStr = new Date(ev.ts || ev.serverTime).toLocaleTimeString('es-CO', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        const dayStr = new Date(ev.ts || ev.serverTime).toLocaleDateString('es-CO', {
+          day: 'numeric',
+          month: 'short'
+        });
+
+        card.innerHTML = `
+          <div>
+            <div class="visit-event-main">${ev.action}</div>
+            <div class="visit-event-meta">${ev.device} · Sesión #${ev.session}</div>
+          </div>
+          <div class="visit-event-time">${dayStr}, ${dateStr}</div>
+        `;
+        visitsListContainer.appendChild(card);
+      });
+    } catch (err) {
+      visitsSummaryBox.innerHTML = 'No se pudo cargar el historial en este momento. Toca "Actualizar ahora".';
+    }
+  }
+
+  if (window.location.search.includes('visitas=1') && visitsDrawer) {
+    visitsDrawer.hidden = false;
+    updateIgnoreBtnLabel();
+    loadVisitsHistory();
+  }
+
+  if (closeVisitsBtn && visitsDrawer) {
+    closeVisitsBtn.addEventListener('click', () => {
+      visitsDrawer.hidden = true;
+    });
+  }
+
+  if (refreshVisitsBtn) {
+    refreshVisitsBtn.addEventListener('click', loadVisitsHistory);
+  }
+
+  if (toggleIgnoreMeBtn) {
+    toggleIgnoreMeBtn.addEventListener('click', () => {
+      try {
+        if (isJairoDevice()) {
+          localStorage.removeItem(JAIRO_FLAG_KEY);
+        } else {
+          localStorage.setItem(JAIRO_FLAG_KEY, '1');
+        }
+      } catch (e) {}
+      updateIgnoreBtnLabel();
+    });
+  }
+
   const editableLabels = {
     welcome_badge: 'Portada · Etiqueta superior',
     welcome_title: 'Portada · Título principal',
