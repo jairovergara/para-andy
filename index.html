@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=6" />
 </head>
 <body>
   <!-- Ambient Background Canvas -->
@@ -22,9 +22,6 @@
     <button id="music-toggle" class="pill-btn" aria-label="Activar melodía suave">
       <span class="music-icon" id="music-icon">♪</span>
       <span id="music-text">Música: Off</span>
-    </button>
-    <button id="open-editor-btn" class="pill-btn editor-trigger-btn hidden-for-andy" title="Pestaña para que Jairo revise y edite todos los textos">
-      <span>✏️ Editar Textos</span>
     </button>
   </div>
 
@@ -476,62 +473,6 @@
     </div>
   </div>
 
-  <!-- PESTAÑA / PANEL DE VISITAS EN TIEMPO REAL PARA JAIRO (?visitas=1) -->
-  <aside id="visits-drawer" class="editor-drawer" hidden>
-    <div class="editor-drawer-header">
-      <div>
-        <h3>📊 ¿Ya la vio Andy? (Registro en vivo)</h3>
-        <p>Aquí aparece en tiempo real cada vez que Andy abre el link, hasta qué sección baja leyendo y qué sobres abre.</p>
-      </div>
-      <button id="close-visits-btn" class="modal-close-inline" aria-label="Cerrar panel">&times;</button>
-    </div>
-
-    <div class="editor-toolbar">
-      <button id="refresh-visits-btn" class="editor-action-btn primary-action">
-        🔄 Actualizar ahora
-      </button>
-      <button id="clear-visits-btn" class="editor-action-btn danger-action">
-        🗑️ Limpiar todo el registro
-      </button>
-      <button id="filter-andy-only-btn" class="editor-action-btn">
-        💖 Filtro: Viendo Todas (Toca para ver solo Andy)
-      </button>
-      <button id="toggle-ignore-me-btn" class="editor-action-btn">
-        🛡️ Silenciar mis visitas desde este navegador
-      </button>
-    </div>
-
-    <div id="visits-summary-box" class="visits-summary-box"></div>
-    <div id="visits-list-container" class="editor-fields-container"></div>
-  </aside>
-
-  <!-- PESTAÑA / PANEL DE EDICIÓN Y APROBACIÓN DE TEXTOS PARA JAIRO -->
-  <aside id="editor-drawer" class="editor-drawer" hidden>
-    <div class="editor-drawer-header">
-      <div>
-        <h3>✏️ Editor de Textos para Jairo</h3>
-        <p>Modifica cualquier título o párrafo aquí mismo. Los cambios se ven al instante y quedan guardados.</p>
-      </div>
-      <button id="close-editor-btn" class="modal-close-inline" aria-label="Cerrar editor">&times;</button>
-    </div>
-
-    <div class="editor-toolbar">
-      <button id="hide-editor-btn" class="editor-action-btn" title="Oculta el botón de editar para cuando se lo envíes a Andy">
-        👁️ Modo Vista Andy (Ocultar botón Editar)
-      </button>
-      <button id="export-texts-btn" class="editor-action-btn primary-action">
-        📋 Copiar textos editados
-      </button>
-      <button id="reset-texts-btn" class="editor-action-btn danger-action">
-        ↺ Restaurar originales
-      </button>
-    </div>
-
-    <div id="editor-fields-container" class="editor-fields-container">
-      <!-- Se llena dinámicamente con todos los textos y títulos de la página -->
-    </div>
-  </aside>
-
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>
